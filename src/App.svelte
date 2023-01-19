@@ -3,38 +3,42 @@
   import Calendar from "./Calendar.svelte";
   import { interrogazioni } from "./store";
   var items = [];
-  var dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  var dayNames = ["Lunedi", "Martedi", "Mercoledi", "Giovedi", "Venerdi", "Sabato","Domenica"];
   let monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "Gennaio",
+    "Febbraio",
+    "Marzo",
+    "Aprile",
+    "Maggio",
+    "Giugno",
+    "Luglio",
+    "Agosto",
+    "Settembre",
+    "Ottobre",
+    "Novembre",
+    "Dicembre",
   ];
   let headers = [];
   let now = new Date();
   let year = now.getFullYear(); //	this is the month & year displayed
   let month = now.getMonth();
-  let eventText = "Click an item or date";
+  let eventText = "Seleziona un evento o una data";
   let nuovoTodo, priority, date, anno, mese, giorno;
   var days = [];
   let allitems = [];
+  var currentItemDate = new Date()
+  var overlapsLimit = 0;
+  let description = "";
   //	The days to display in each box
   //	The Calendar Component just displays stuff in a row & column. It has no knowledge of dates.
   //	The items[] below are placed (by you) in a specified row & column of the calendar.
   //	You need to call findRowCol() to calc the row/col based on each items start date. Each date        box has a Date() property.
   //	And, if an item overlaps rows, then you need to add a 2nd item on the subsequent row.
-
+ console.log("ciao");
   function AddTodo() {
     var ele = document.getElementsByName("priority");
-    for (let i = 0; i < ele.length; i++) {
+    var sameDate = false;
+    for(let i = 0; i < ele.length; i++) {
       if (ele[i].checked) {
         priority = ele[i].value;
         break;
@@ -42,46 +46,77 @@
     }
     //Formattazione dei dati
     anno = parseInt(date.substring(0, 4));
-    mese = parseInt(date.substring(6, 8)) - 1;
+    mese = parseInt(date.substring(5, 7)) - 1;
     giorno = parseInt(date.substring(8, 10));
-
-    interrogazioni.update((oldValue) => {
-      oldValue.push({
-        titolo: nuovoTodo,
-        anno: anno,
-        mese: mese,
-        giorno: giorno,
-        priorita: priority,
-      });
-      return oldValue;
-    });
-    allitems = overwrite();
-    initContent();
-  //console.log(JSON.stringify(items));
+    
+    currentItemDate = new Date(anno, mese, giorno);
+    
+      for(let j of $interrogazioni){
+          if(j.date.getTime() == currentItemDate.getTime() ){
+             sameDate = true;
+             overlapsLimit++;
+            //j.sameDate = true
+            //overlapsLimit
+          }
+      }
+        if(overlapsLimit <= 1)
+        {
+          interrogazioni.update((oldValue) => {
+            oldValue.push({
+                titolo: nuovoTodo,
+                date: currentItemDate,
+                priorita: priority,
+                isBottom: sameDate,
+                descrizione: description
+            });
+            return oldValue;
+          });
+          allitems = overwrite();
+          initContent();
+        }
+      else
+          alert("Impossibile aggiungere la task richiesta. (max task raggiunte)");
+    overlapsLimit = 0;
   }
-  
+  /*
+  $interrogazioni[i].isbottom = [i].date.getDate()
+  */
   function overwrite() {
     var array = [];
     for (var i = 0; i < $interrogazioni.length; i++) {
+     // if($interrogazioni.length != 1)
+          //(if $interrogazioni[i].date == currentItemDate)
+      //if(array.includes(currentItemDate))
       array[i] = {
         title: $interrogazioni[i].titolo,
         className: $interrogazioni[i].priorita,
-        date: new Date(
-          $interrogazioni[i].anno,
-          $interrogazioni[i].mese,
-          $interrogazioni[i].giorno
-        ),
+        date: $interrogazioni[i].date,
         len: 1,
         id: i,
+        isBottom: $interrogazioni[i].isBottom,
+        description: $interrogazioni[i].descrizione
       };
     }
     return array;
   }
-  
-  function getMonthItems() {
-    var array = [];
+  function getYearItems(){
+    var array2 = [];
     var index = 0;
     for (let i of allitems) {
+      if (i.date.getFullYear() == year) {
+        array2[index] = i;
+        index++;
+      }
+    }
+    console.log(array2);
+    return array2;
+  }
+  
+  function getMonthItems() {
+    var year = getYearItems();
+    var array = [];
+    var index = 0;
+    for (let i of year) {
       if (i.date.getMonth() == month) {
         array[index] = i;
         index++;
@@ -92,9 +127,9 @@
   
   function initMonthItems() {
     items = getMonthItems();
+    console.log(items);
     //This is where you calc the row/col to put each dated item
     for (let i of items) {
-      console.log(i);
       let rc = findRowCol(i.date);
       if (rc == null) {
         console.log("didn`t find date for ", i);
@@ -173,11 +208,7 @@
 
   function itemClick(e) {
     eventText =
-      "Task: " + e.title;
-  }
-  
-  function headerClick(e) {
-    eventText = "onHheaderClick " + JSON.stringify(e);
+      "Descrizione: " + e.description;
   }
   
   function next() {
@@ -227,27 +258,34 @@
     on:headerClick={(e) => headerClick(e.detail)}
   />
 </div>
-<input type="checkbox" id="my-modal" class="modal-toggle" />
+<input type="checkbox" id="AddEv" class="modal-toggle" />
     <div class="modal">
       <div class="modal-box">
         <h3 class="font-bold text-lg">Aggiungi un evento al calendario</h3>
         <br>
-        <input type="text" bind:value={nuovoTodo} placeholder="Titolo"/>
-        <br><br>  
+        <input type="text" bind:value={nuovoTodo} placeholder="Titolo" class="input input-ghost w-full max-w-xs" />
+        <br><br>
+        <textarea class="textarea textarea-ghost" placeholder="Descrizione" bind:value=      {description}></textarea>
+        <br><br>
         <input type="date" bind:value={date}/>
         <br><br>
         <div class=c>
-        <input type="radio"  name="priority" value="task--danger"/>Alta 
-        <input type="radio"  name="priority" value="task-warning"/>Media
-        <input type="radio"  value ="task--info" name="priority"/>Bassa
+          
+        <input type="radio"  name="priority" value="task--danger"/> Alta 
+        <input type="radio"  name="priority" value="task--warning"/> Media
+        <input type="radio"  value ="task--info" name="priority"/> Bassa
+          
         </div> 
         <div class="modal-action">
-          <label for="my-modal" class="btn" on:click={AddTodo}>Ok</label>
+          <label for="my-modal" class="btn btn-outline btn-error" on:click={AddTodo}>Annulla</label>
+          <label for="my-modal" class="btn btn-outline btn-success" on:click={AddTodo}>Conferma</label>
         </div>
+
+   
       </div>
     </div>
 
-<input type="checkbox" id="my-modal" class="modal-toggle" />
+<input type="checkbox" id="RemEv" class="modal-toggle" />
     <div class="modal">
       <div class="modal-box">
         <h3 class="font-bold text-lg">Rim un evento al calendario</h3>
