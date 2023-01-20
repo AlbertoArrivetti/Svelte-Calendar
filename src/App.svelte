@@ -31,12 +31,8 @@
   let description = "";
   let titleToDelete = "";
   let dateToDelete = ""
-  //	The days to display in each box
-  //	The Calendar Component just displays stuff in a row & column. It has no knowledge of dates.
-  //	The items[] below are placed (by you) in a specified row & column of the calendar.
-  //	You need to call findRowCol() to calc the row/col based on each items start date. Each date        box has a Date() property.
-  //	And, if an item overlaps rows, then you need to add a 2nd item on the subsequent row.
- console.log("ciao");
+
+
   function AddTodo() {
     var ele = document.getElementsByName("priority");
     var sameDate = false;
@@ -103,7 +99,6 @@
         index++;
       }
     }
-    console.log(array2);
     return array2;
   }
   
@@ -122,7 +117,6 @@
   
   function initMonthItems() {
     items = getMonthItems();
-    console.log(items);
     //This is where you calc the row/col to put each dated item
     for (let i of items) {
       let rc = findRowCol(i.date);
@@ -229,25 +223,15 @@
     console.log("Updated the calendar");
   }
   function Delete(){
-    /*anno = parseInt(date.substring(0, 4));
-    mese = parseInt(date.substring(5, 7)) - 1;
-    giorno = parseInt(date.substring(8, 10));
-    currentItemDate = new Date(anno, mese, giorno);
-    for(let i = 0; i < $interrogazioni.length; i++){
-      if(nuovoTodo == $interrogazioni[i].titolo &&currentItemDate.getTime() ==                               $interrogazioni[i].date.getTime()){
-        delete $interrogazioni[i];
-        $interrogazioni = $interrogazioni;
-        delete allitems[i];
-        allitems = allitems;
-        initContent();
-        return true;
-      }
-    }
-    return false;*/
     let deleteYear = parseInt(date.substring(0, 4));
     let deleteMonth = parseInt(date.substring(5, 7)) - 1;
     let deleteDay = parseInt(date.substring(8, 10));
     let deleteDate = new Date(deleteYear, deleteMonth, deleteDay);
+    for(let i of $interrogazioni){
+      if(i.titolo == titleToDelete && i.date.getTime() == deleteDate.getTime())
+        console.log("GOTCHA")
+        
+    }
     
   }
 </script>
