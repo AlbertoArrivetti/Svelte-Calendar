@@ -29,6 +29,8 @@
   var currentItemDate = new Date()
   var overlapsLimit = 0;
   let description = "";
+  let titleToDelete = "";
+  let dateToDelete = ""
   //	The days to display in each box
   //	The Calendar Component just displays stuff in a row & column. It has no knowledge of dates.
   //	The items[] below are placed (by you) in a specified row & column of the calendar.
@@ -55,8 +57,6 @@
           if(j.date.getTime() == currentItemDate.getTime() ){
              sameDate = true;
              overlapsLimit++;
-            //j.sameDate = true
-            //overlapsLimit
           }
       }
         if(overlapsLimit <= 1)
@@ -78,15 +78,10 @@
           alert("Impossibile aggiungere la task richiesta. (max task raggiunte)");
     overlapsLimit = 0;
   }
-  /*
-  $interrogazioni[i].isbottom = [i].date.getDate()
-  */
+  
   function overwrite() {
     var array = [];
     for (var i = 0; i < $interrogazioni.length; i++) {
-     // if($interrogazioni.length != 1)
-          //(if $interrogazioni[i].date == currentItemDate)
-      //if(array.includes(currentItemDate))
       array[i] = {
         title: $interrogazioni[i].titolo,
         className: $interrogazioni[i].priorita,
@@ -233,7 +228,28 @@
   function refresh(event) {
     console.log("Updated the calendar");
   }
-  
+  function Delete(){
+    /*anno = parseInt(date.substring(0, 4));
+    mese = parseInt(date.substring(5, 7)) - 1;
+    giorno = parseInt(date.substring(8, 10));
+    currentItemDate = new Date(anno, mese, giorno);
+    for(let i = 0; i < $interrogazioni.length; i++){
+      if(nuovoTodo == $interrogazioni[i].titolo &&currentItemDate.getTime() ==                               $interrogazioni[i].date.getTime()){
+        delete $interrogazioni[i];
+        $interrogazioni = $interrogazioni;
+        delete allitems[i];
+        allitems = allitems;
+        initContent();
+        return true;
+      }
+    }
+    return false;*/
+    let deleteYear = parseInt(date.substring(0, 4));
+    let deleteMonth = parseInt(date.substring(5, 7)) - 1;
+    let deleteDay = parseInt(date.substring(8, 10));
+    let deleteDate = new Date(deleteYear, deleteMonth, deleteDay);
+    
+  }
 </script>
 
 <div class="calendar-container">
@@ -287,17 +303,12 @@
     <div class="modal">
       <div class="modal-box">
         <h3 class="font-bold text-lg">Rimuovi un evento al calendario</h3>
-        <input type="text" bind:value={nuovoTodo} placeholder="Titolo"/>
+        <input type="text" bind:value={titleToDelete} placeholder="Titolo"/>
         <br>  
-        <input type="date" bind:value={date}/>
-        <br>
-        <input type="radio"  name="priority" value="task--danger"/>Alta
-        <input type="radio"  name="priority" value="task-warning"/>Media
-        <input type="radio"  value ="task--info" name="priority"/>Bassa
-        <br>  
+        <input type="date" bind:value={dateToDelete}/>
         <div class="modal-action">
           <label for="RemEv" class="btn btn-outline btn-error">Annulla</label>
-          <label for="RemEv" class="btn" on:click={AddTodo}>Ok</label>
+          <label for="RemEv" class="btn" on:click={Delete}>Ok</label>
         </div>
       </div>
     </div>
