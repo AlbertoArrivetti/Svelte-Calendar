@@ -49,36 +49,35 @@
     
     currentItemDate = new Date(anno, mese, giorno);
     
-      for(let j of $interrogazioni){
+    for(let j of $interrogazioni){
           if(j.date.getTime() == currentItemDate.getTime() ){
              sameDate = true;
              overlapsLimit++;
           }
-      }
-        if(overlapsLimit <= 1)
-        {
-          interrogazioni.update((oldValue) => {
-            oldValue.push({
-                titolo: nuovoTodo,
-                date: currentItemDate,
-                priorita: priority,
-                isBottom: sameDate,
-                descrizione: description
-            });
-            return oldValue;
+    }
+    if(overlapsLimit <= 1)
+      {
+        interrogazioni.update((oldValue) => {
+          oldValue.push({
+              titolo: nuovoTodo,
+              date: currentItemDate,
+              priorita: priority,
+              isBottom: sameDate,
+              descrizione: description
           });
-          allitems = overwrite();
-          initContent();
-        }
-      else
-          alert("Impossibile aggiungere la task richiesta. (max task raggiunte)");
+          return oldValue;
+        });
+        overwrite();
+        initContent();
+    }
+    else
+        alert("Impossibile aggiungere la task richiesta. (max task raggiunte)");
     overlapsLimit = 0;
   }
   
   function overwrite() {
-    var array = [];
     for (var i = 0; i < $interrogazioni.length; i++) {
-      array[i] = {
+      allitems[i] = {
         title: $interrogazioni[i].titolo,
         className: $interrogazioni[i].priorita,
         date: $interrogazioni[i].date,
@@ -88,7 +87,6 @@
         description: $interrogazioni[i].descrizione
       };
     }
-    return array;
   }
   function getYearItems(){
     var array2 = [];
