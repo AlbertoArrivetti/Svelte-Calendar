@@ -258,7 +258,7 @@
     on:headerClick={(e) => headerClick(e.detail)}
   />
 </div>
-<input type="checkbox" id="AddEv" class="modal-toggle" />
+<input type="checkbox" id="addEv" class="modal-toggle" />
     <div class="modal">
       <div class="modal-box">
         <h3 class="font-bold text-lg">Aggiungi un evento al calendario</h3>
@@ -269,7 +269,7 @@
         <br><br>
         <input type="date" bind:value={date}/>
         <br><br>
-        <div class=c>
+        <div class="c">
           
         <input type="radio"  name="priority" value="task--danger"/> Alta 
         <input type="radio"  name="priority" value="task--warning"/> Media
@@ -277,18 +277,16 @@
           
         </div> 
         <div class="modal-action">
-          <label for="my-modal" class="btn btn-outline btn-error" on:click={AddTodo}>Annulla</label>
-          <label for="my-modal" class="btn btn-outline btn-success" on:click={AddTodo}>Conferma</label>
+          <label for="addEv" class="btn btn-outline btn-error">Annulla</label>
+          <label for="addEv" class="btn btn-outline btn-success" on:click={AddTodo}>Conferma</label>
         </div>
-
-   
       </div>
     </div>
 
 <input type="checkbox" id="RemEv" class="modal-toggle" />
     <div class="modal">
       <div class="modal-box">
-        <h3 class="font-bold text-lg">Rim un evento al calendario</h3>
+        <h3 class="font-bold text-lg">Rimuovi un evento al calendario</h3>
         <input type="text" bind:value={nuovoTodo} placeholder="Titolo"/>
         <br>  
         <input type="date" bind:value={date}/>
@@ -298,7 +296,8 @@
         <input type="radio"  value ="task--info" name="priority"/>Bassa
         <br>  
         <div class="modal-action">
-          <label for="my-modal" class="btn" on:click={AddTodo}>Ok</label>
+          <label for="RemEv" class="btn btn-outline btn-error">Annulla</label>
+          <label for="RemEv" class="btn" on:click={AddTodo}>Ok</label>
         </div>
       </div>
     </div>
