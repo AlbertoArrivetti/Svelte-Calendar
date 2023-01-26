@@ -3,7 +3,15 @@
   import Calendar from "./Calendar.svelte";
   import { interrogazioni } from "./store";
   var items = [];
-  var dayNames = ["Lunedi", "Martedi", "Mercoledi", "Giovedi", "Venerdi", "Sabato","Domenica"];
+  var dayNames = [
+    "Lunedi",
+    "Martedi",
+    "Mercoledi",
+    "Giovedi",
+    "Venerdi",
+    "Sabato",
+    "Domenica",
+  ];
   let monthNames = [
     "Gennaio",
     "Febbraio",
@@ -26,17 +34,20 @@
   let nuovoTodo, priority, date, anno, mese, giorno;
   var days = [];
   let allitems = [];
-  var currentItemDate = new Date()
+  var currentItemDate = new Date();
   var overlapsLimit = 0;
   let description = "";
   let titleToDelete = "";
-  let dateToDelete = ""
-
+  let dateToDelete = "";
+  let id = 0;
 
   function AddTodo() {
+    if(nuovoTodo.length > 11){
+      nuovoTodo = nuovoTodo.substring(0,10);
+    }
     var ele = document.getElementsByName("priority");
     var sameDate = false;
-    for(let i = 0; i < ele.length; i++) {
+    for (let i = 0; i < ele.length; i++) {
       if (ele[i].checked) {
         priority = ele[i].value;
         break;
@@ -46,49 +57,51 @@
     anno = parseInt(date.substring(0, 4));
     mese = parseInt(date.substring(5, 7)) - 1;
     giorno = parseInt(date.substring(8, 10));
-    
+
     currentItemDate = new Date(anno, mese, giorno);
-    
-    for(let j of $interrogazioni){
-          if(j.date.getTime() == currentItemDate.getTime() ){
-             sameDate = true;
-             overlapsLimit++;
-          }
+
+    for (let j of $interrogazioni) {
+      if (j.date.getTime() == currentItemDate.getTime()) {
+        sameDate = true;
+        overlapsLimit++;
+      }
     }
-    if(overlapsLimit <= 1)
-      {
-        interrogazioni.update((oldValue) => {
-          oldValue.push({
-              titolo: nuovoTodo,
-              date: currentItemDate,
-              priorita: priority,
-              isBottom: sameDate,
-              descrizione: description
-          });
-          return oldValue;
+    if (overlapsLimit <= 1) {
+      interrogazioni.update((oldValue) => {
+        oldValue.push({
+          titolo: nuovoTodo,
+          date: currentItemDate,
+          priorita: priority,
+          isBottom: sameDate,
+          descrizione: description,
+          id: id
         });
-        overwrite();
-        initContent();
-    }
-    else
-        alert("Impossibile aggiungere la task richiesta. (max task raggiunte)");
+        return oldValue;
+      });
+      id++;
+      overWrite();
+      initContent();
+    } else
+      alert("Impossibile aggiungere la task richiesta. (max task raggiunte)");
     overlapsLimit = 0;
   }
-  
-  function overwrite() {
+
+  function overWrite() {
     for (var i = 0; i < $interrogazioni.length; i++) {
       allitems[i] = {
         title: $interrogazioni[i].titolo,
         className: $interrogazioni[i].priorita,
         date: $interrogazioni[i].date,
         len: 1,
-        id: i,
+        id: $interrogazioni[i].id,
         isBottom: $interrogazioni[i].isBottom,
-        description: $interrogazioni[i].descrizione
+        description: $interrogazioni[i].descrizione,
       };
     }
+
   }
-  function getYearItems(){
+
+  function getYearItems() {
     var array2 = [];
     var index = 0;
     for (let i of allitems) {
@@ -99,7 +112,7 @@
     }
     return array2;
   }
-  
+
   function getMonthItems() {
     var year = getYearItems();
     var array = [];
@@ -112,16 +125,13 @@
     }
     return array;
   }
-  
+
   function initMonthItems() {
     items = getMonthItems();
     //This is where you calc the row/col to put each dated item
     for (let i of items) {
       let rc = findRowCol(i.date);
       if (rc == null) {
-        console.log("didn`t find date for ", i);
-        console.log(i.date);
-        console.log(days);
         i.startCol = i.startRow = 0;
       } else {
         i.startCol = rc.col;
@@ -129,10 +139,10 @@
       }
     }
   }
-  
+
   $: month, year, initContent();
   // choose what date/day gets displayed in each date box.
-  
+
   function initContent() {
     headers = dayNames;
     initMonth();
@@ -145,7 +155,6 @@
     let nextMonthAbbrev = monthNames[(month + 1) % 12].slice(0, 3);
     //	find the last Monday of the previous month
     var firstDay = new Date(year, month, 1).getDay();
-    //console.log('fd='+firstDay+' '+dayNames[firstDay]);
     var daysInThisMonth = new Date(year, month + 1, 0).getDate();
     var daysInLastMonth = new Date(year, month, 0).getDate();
     var prevMonth = month == 0 ? 11 : month - 1;
@@ -165,7 +174,6 @@
           date: d,
         });
       else days.push({ name: "" + (i + 1), enabled: true, date: d });
-      //console.log('i='+i+'  dt is '+d+' date() is '+d.getDate());
     }
     //	show any days to fill up the last row (disabled) - always less than 7
     for (let i = 0; days.length % 7; i++) {
@@ -194,10 +202,9 @@
   }
 
   function itemClick(e) {
-    eventText =
-      "Descrizione: " + e.description;
+    eventText = "Descrizione: " + e.description;
   }
-  
+
   function next() {
     month++;
     if (month == 12) {
@@ -206,7 +213,7 @@
     }
     initContent();
   }
-  
+
   function prev() {
     if (month == 0) {
       month = 11;
@@ -217,25 +224,39 @@
     initContent();
   }
   
-  function refresh(event) {
-    console.log("Updated the calendar");
+  function Refresh() {
+    next();
+    prev();
   }
-  function Delete(){
+
+  function UpdateStore(id){
+    $interrogazioni = $interrogazioni.filter(i => i.id != id );
+    allitems = allitems.filter(s => s.id != id)
+    console.log(allitems);
+  }
+  function Delete() {
     let deleteYear = parseInt(date.substring(0, 4));
     let deleteMonth = parseInt(date.substring(5, 7)) - 1;
     let deleteDay = parseInt(date.substring(8, 10));
     let deleteDate = new Date(deleteYear, deleteMonth, deleteDay);
-    for(let i of $interrogazioni){
-      if(i.titolo == titleToDelete && i.date.getTime() == deleteDate.getTime())
-        console.log("GOTCHA")
-        
+    let index = 0;
+    for (let i of $interrogazioni) {
+      if (
+        i.titolo == titleToDelete &&
+        i.date.getTime() == deleteDate.getTime()
+      ) {
+        UpdateStore(i.id);
+        break;
+      }
+      index++;
     }
-    
+    overWrite();
+    refresh();
   }
 </script>
 
 <div class="calendar-container">
-  <div class="calendar-header">
+  <div class="calendar-header"> 
     <h1>
       <button on:click={() => year--}>&Lt;</button>
       <button on:click={() => prev()}>&lt;</button>
@@ -257,43 +278,52 @@
   />
 </div>
 <input type="checkbox" id="addEv" class="modal-toggle" />
-    <div class="modal">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Aggiungi un evento al calendario</h3>
-        <br>
-        <input type="text" bind:value={nuovoTodo} placeholder="Titolo" class="input input-ghost w-full max-w-xs" />
-        <br><br>
-        <textarea class="textarea textarea-ghost" placeholder="Descrizione" bind:value=      {description}></textarea>
-        <br><br>
-        <input type="date" bind:value={date}/>
-        <br><br>
-        <div class="c">
-          
-        <input type="radio"  name="priority" value="task--danger"/> Alta 
-        <input type="radio"  name="priority" value="task--warning"/> Media
-        <input type="radio"  value ="task--info" name="priority"/> Bassa
-          
-        </div> 
-        <div class="modal-action">
-          <label for="addEv" class="btn btn-outline btn-error">Annulla</label>
-          <label for="addEv" class="btn btn-outline btn-success" on:click={AddTodo}>Conferma</label>
-        </div>
-      </div>
+<div class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Aggiungi un evento al calendario</h3>
+    <br />
+    <input
+      type="text"
+      bind:value={nuovoTodo}
+      placeholder="Titolo"
+      class="input input-ghost w-full max-w-xs"
+    />
+    <br /><br />
+    <textarea
+      class="textarea textarea-ghost"
+      placeholder="Descrizione"
+      bind:value={description}
+    />
+    <br /><br />
+    <input type="date" bind:value={date} />
+    <br /><br />
+    <div class="c">
+      <input type="radio" name="priority" value="task--danger" /> Alta
+      <input type="radio" name="priority" value="task--warning" /> Media
+      <input type="radio" value="task--info" name="priority" /> Bassa
     </div>
+    <div class="modal-action">
+      <label for="addEv" class="btn btn-outline btn-error">Annulla</label>
+      <label for="addEv" class="btn btn-outline btn-success" on:click={AddTodo}
+        >Conferma</label
+      >
+    </div>
+  </div>
+</div>
 
 <input type="checkbox" id="RemEv" class="modal-toggle" />
-    <div class="modal">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Rimuovi un evento al calendario</h3>
-        <input type="text" bind:value={titleToDelete} placeholder="Titolo"/>
-        <br>  
-        <input type="date" bind:value={dateToDelete}/>
-        <div class="modal-action">
-          <label for="RemEv" class="btn btn-outline btn-error">Annulla</label>
-          <label for="RemEv" class="btn" on:click={Delete}>Ok</label>
-        </div>
-      </div>
+<div class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Rimuovi un evento al calendario</h3>
+    <input type="text" bind:value={titleToDelete} placeholder="Titolo" />
+    <br />
+    <input type="date" bind:value={dateToDelete} />
+    <div class="modal-action">
+      <label for="RemEv" class="btn btn-outline btn-error">Annulla</label>
+      <label for="RemEv" class="btn" on:click={Delete}>Ok</label>
     </div>
+  </div>
+</div>
 
 <style>
   .calendar-container {
