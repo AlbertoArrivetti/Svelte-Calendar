@@ -251,7 +251,7 @@
       index++;
     }
     overWrite();
-    refresh();
+    Refresh();
   }
 </script>
 
@@ -272,9 +272,8 @@
     {headers}
     {days}
     {items}
-    on:scroll={refresh()}
+    on:scroll={Refresh()}
     on:itemClick={(e) => itemClick(e.detail)}
-    on:headerClick={(e) => headerClick(e.detail)}
   />
 </div>
 <input type="checkbox" id="addEv" class="modal-toggle" />
@@ -295,7 +294,7 @@
       bind:value={description}
     />
     <br /><br />
-    <input type="date" bind:value={date} />
+    <input type="date"  bind:value={date} />
     <br /><br />
     <div class="c">
       <input type="radio" name="priority" value="task--danger" /> Alta
@@ -304,9 +303,8 @@
     </div>
     <div class="modal-action">
       <label for="addEv" class="btn btn-outline btn-error">Annulla</label>
-      <label for="addEv" class="btn btn-outline btn-success" on:click={AddTodo}
-        >Conferma</label
-      >
+      <label for="addEv" class="btn btn-outline btn-success" on:click={AddTodo}             >Conferma
+    </label>
     </div>
   </div>
 </div>
@@ -315,12 +313,19 @@
 <div class="modal">
   <div class="modal-box">
     <h3 class="font-bold text-lg">Rimuovi un evento al calendario</h3>
-    <input type="text" bind:value={titleToDelete} placeholder="Titolo" />
+    <br />
+    <input
+      type="text"
+      bind:value={nuovoTodo}
+      placeholder="Titolo"
+      class="input input-ghost w-full max-w-xs"
+    />
+    <br />
     <br />
     <input type="date" bind:value={dateToDelete} />
     <div class="modal-action">
       <label for="RemEv" class="btn btn-outline btn-error">Annulla</label>
-      <label for="RemEv" class="btn" on:click={Delete}>Ok</label>
+      <label for="RemEv" class="btn btn-outline btn-success" on:click={Delete}>Ok</label>
     </div>
   </div>
 </div>
