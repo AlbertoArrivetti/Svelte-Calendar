@@ -43,7 +43,6 @@
   onMount(() =>{
     load();
     refresh();
-    console.log(allitems);
   })
   function AddTodo() {
     if(nuovoTodo.length > 11){
@@ -85,7 +84,6 @@
       id++;
       overWrite();
       initContent();
-      save();
     } else
       alert("Impossibile aggiungere la task richiesta. (max task raggiunte)");
     overlapsLimit = 0;
@@ -129,7 +127,6 @@
         });
         return oldValue;
       });
-      console.log($interrogazioni);
     }
     overWrite();
   }
@@ -266,11 +263,12 @@
     allitems = allitems.filter(s => s.id != id)
   }
   function Delete() {
-    let deleteYear = parseInt(date.substring(0, 4));
-    let deleteMonth = parseInt(date.substring(5, 7)) - 1;
-    let deleteDay = parseInt(date.substring(8, 10));
+    let deleteYear = parseInt(dateToDelete.substring(0, 4));
+    let deleteMonth = parseInt(dateToDelete.substring(5, 7)) - 1;
+    let deleteDay = parseInt(dateToDelete.substring(8, 10));
     let deleteDate = new Date(deleteYear, deleteMonth, deleteDay);
     let index = 0;
+
     for (let i of $interrogazioni) {
       if (i.title == titleToDelete &&
         i.date.getTime() == deleteDate.getTime()) {
@@ -286,7 +284,6 @@
     }
     overWrite();
     refresh();
-    console.log(allitems);
   }
 </script>
 
@@ -345,20 +342,32 @@
   </div>
 </div>
 
-<input type="checkbox" id="RemEv" class="modal-toggle" />
+<input type="checkbox" id="saveEv" class="modal-toggle" />
 <div class="modal">
   <div class="modal-box">
-    <h3 class="font-bold text-lg">Rimuovi un evento al calendario</h3>
-    <input type="text" bind:value={titleToDelete} placeholder="Titolo" />
+    <h3 class="font-bold text-lg">Sei sicuro di voler salvare?</h3>
     <br />
-    <input type="date" bind:value={dateToDelete} />
     <div class="modal-action">
-      <label for="RemEv" class="btn btn-outline btn-error">Annulla</label>
-      <label for="RemEv" class="btn" on:click={Delete}>Ok</label>
+      <label for="saveEv" class="btn btn-outline btn-error">Annulla</label>
+      <label for="saveEv" class="btn btn-outline btn-success" on:click={save}>Conferma</label>
     </div>
   </div>
 </div>
 
+<input type="checkbox" id="RemEv" class="modal-toggle" />
+<div class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Rimuovi un evento al calendario</h3>
+    <br />
+    <input type="text" bind:value={titleToDelete} class="input input-ghost w-full max-w-xs" placeholder="Titolo" />
+    <br /><br />
+    <input type="date" bind:value={dateToDelete} />
+    <div class="modal-action">
+      <label for="RemEv" class="btn btn-outline btn-error">Annulla</label>
+      <label for="RemEv" class="btn btn-outline btn-success" on:click={Delete}>Conferma</label>
+    </div>
+  </div>
+</div>
 <style>
   .calendar-container {
     width: 90%;
