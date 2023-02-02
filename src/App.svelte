@@ -1,7 +1,7 @@
 <script>
-  //Todo: refresh the calendar, save on .json file the data
   import Calendar from "./Calendar.svelte";
   import { interrogazioni } from "./store";
+  import { onMount } from 'svelte';
   var items = [];
   var dayNames = [
     "Lunedi",
@@ -40,7 +40,11 @@
   let titleToDelete = "";
   let dateToDelete = "";
   let id = 0;
-
+  onMount(() =>{
+    load();
+    refresh();
+    console.log(allitems);
+  })
   function AddTodo() {
     if(nuovoTodo.length > 11){
       nuovoTodo = nuovoTodo.substring(0,10);
@@ -59,7 +63,7 @@
     giorno = parseInt(date.substring(8, 10));
 
     currentItemDate = new Date(anno, mese, giorno);
-
+  
     for (let j of $interrogazioni) {
       if (j.date.getTime() == currentItemDate.getTime()) {
         sameDate = true;
@@ -69,11 +73,11 @@
     if (overlapsLimit <= 1) {
       interrogazioni.update((oldValue) => {
         oldValue.push({
-          titolo: nuovoTodo,
+          title: nuovoTodo,
           date: currentItemDate,
-          priorita: priority,
+          className: priority,
           isBottom: sameDate,
-          descrizione: description,
+          description: description,
           id: id
         });
         return oldValue;
@@ -81,6 +85,7 @@
       id++;
       overWrite();
       initContent();
+      save();
     } else
       alert("Impossibile aggiungere la task richiesta. (max task raggiunte)");
     overlapsLimit = 0;
@@ -89,18 +94,45 @@
   function overWrite() {
     for (var i = 0; i < $interrogazioni.length; i++) {
       allitems[i] = {
-        title: $interrogazioni[i].titolo,
-        className: $interrogazioni[i].priorita,
+        title: $interrogazioni[i].title,
+        className: $interrogazioni[i].className,
         date: $interrogazioni[i].date,
         len: 1,
         id: $interrogazioni[i].id,
         isBottom: $interrogazioni[i].isBottom,
-        description: $interrogazioni[i].descrizione,
+        description: $interrogazioni[i].description,
       };
     }
 
   }
-
+  function save(){
+    localStorage.setItem('item', JSON.stringify(allitems));
+  }
+  function load(){
+    let test = JSON.parse(localStorage.getItem('item'));
+    for(let i of test){
+      
+      anno = parseInt(i["date"].substring(0, 4));
+      mese = parseInt(i["date"].substring(5, 7)) - 1;
+      giorno = parseInt(i["date"].substring(8, 10)) + 1;
+      
+      currentItemDate = new Date(anno, mese, giorno);
+      
+      interrogazioni.update((oldValue) => {
+        oldValue.push({
+          title: i["title"],
+          date: currentItemDate,
+          className: i["className"],
+          isBottom: i["isBottom"],
+          description: i["description"],
+          id: i["id"]
+        });
+        return oldValue;
+      });
+      console.log($interrogazioni);
+    }
+    overWrite();
+  }
   function getYearItems() {
     var array2 = [];
     var index = 0;
@@ -224,7 +256,7 @@
     initContent();
   }
   
-  function Refresh() {
+  function refresh() {
     next();
     prev();
   }
@@ -232,7 +264,6 @@
   function UpdateStore(id){
     $interrogazioni = $interrogazioni.filter(i => i.id != id );
     allitems = allitems.filter(s => s.id != id)
-    console.log(allitems);
   }
   function Delete() {
     let deleteYear = parseInt(date.substring(0, 4));
@@ -241,17 +272,21 @@
     let deleteDate = new Date(deleteYear, deleteMonth, deleteDay);
     let index = 0;
     for (let i of $interrogazioni) {
-      if (
-        i.titolo == titleToDelete &&
-        i.date.getTime() == deleteDate.getTime()
-      ) {
+      if (i.title == titleToDelete &&
+        i.date.getTime() == deleteDate.getTime()) {
         UpdateStore(i.id);
+          for(let j of $interrogazioni){
+            if(j.date.getTime() == deleteDate.getTime()){
+              j.isBottom = false;
+            }
+          }  
         break;
-      }
+        }
       index++;
     }
     overWrite();
-    Refresh();
+    refresh();
+    console.log(allitems);
   }
 </script>
 
@@ -272,7 +307,7 @@
     {headers}
     {days}
     {items}
-    on:scroll={Refresh()}
+    on:scroll={refresh()}
     on:itemClick={(e) => itemClick(e.detail)}
   />
 </div>
@@ -294,7 +329,7 @@
       bind:value={description}
     />
     <br /><br />
-    <input type="date"  bind:value={date} />
+    <input type="date" bind:value={date} />
     <br /><br />
     <div class="c">
       <input type="radio" name="priority" value="task--danger" /> Alta
@@ -303,8 +338,9 @@
     </div>
     <div class="modal-action">
       <label for="addEv" class="btn btn-outline btn-error">Annulla</label>
-      <label for="addEv" class="btn btn-outline btn-success" on:click={AddTodo}             >Conferma
-    </label>
+      <label for="addEv" class="btn btn-outline btn-success" on:click={AddTodo}
+        >Conferma</label
+      >
     </div>
   </div>
 </div>
@@ -313,19 +349,12 @@
 <div class="modal">
   <div class="modal-box">
     <h3 class="font-bold text-lg">Rimuovi un evento al calendario</h3>
-    <br />
-    <input
-      type="text"
-      bind:value={nuovoTodo}
-      placeholder="Titolo"
-      class="input input-ghost w-full max-w-xs"
-    />
-    <br />
+    <input type="text" bind:value={titleToDelete} placeholder="Titolo" />
     <br />
     <input type="date" bind:value={dateToDelete} />
     <div class="modal-action">
       <label for="RemEv" class="btn btn-outline btn-error">Annulla</label>
-      <label for="RemEv" class="btn btn-outline btn-success" on:click={Delete}>Ok</label>
+      <label for="RemEv" class="btn" on:click={Delete}>Ok</label>
     </div>
   </div>
 </div>
