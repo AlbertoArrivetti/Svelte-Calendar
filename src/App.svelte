@@ -45,9 +45,6 @@
     refresh();
   })
   function AddTodo() {
-    if(nuovoTodo.length > 11){
-      nuovoTodo = nuovoTodo.substring(0,10);
-    }
     var ele = document.getElementsByName("priority");
     var sameDate = false;
     for (let i = 0; i < ele.length; i++) {
@@ -56,37 +53,44 @@
         break;
       }
     }
-    //Formattazione dei dati
-    anno = parseInt(date.substring(0, 4));
-    mese = parseInt(date.substring(5, 7)) - 1;
-    giorno = parseInt(date.substring(8, 10));
-
-    currentItemDate = new Date(anno, mese, giorno);
-  
-    for (let j of $interrogazioni) {
-      if (j.date.getTime() == currentItemDate.getTime()) {
-        sameDate = true;
-        overlapsLimit++;
+    if(description.length != 0 && nuovoTodo.length != 0 &&               date.length != 0 && priority.length != 0){
+      if(nuovoTodo.length > 11){
+        nuovoTodo = nuovoTodo.substring(0,10);
       }
-    }
-    if (overlapsLimit <= 1) {
-      interrogazioni.update((oldValue) => {
-        oldValue.push({
-          title: nuovoTodo,
-          date: currentItemDate,
-          className: priority,
-          isBottom: sameDate,
-          description: description,
-          id: id
+      //Formattazione dei dati
+      anno = parseInt(date.substring(0, 4));
+      mese = parseInt(date.substring(5, 7)) - 1;
+      giorno = parseInt(date.substring(8, 10));
+
+      currentItemDate = new Date(anno, mese, giorno);
+  
+      for (let j of $interrogazioni) {
+        if (j.date.getTime() == currentItemDate.getTime()) {
+          sameDate = true;
+          overlapsLimit++;
+        }
+      }
+      if (overlapsLimit <= 1) {
+        interrogazioni.update((oldValue) => {
+          oldValue.push({
+            title: nuovoTodo,
+            date: currentItemDate,
+            className: priority,
+            isBottom: sameDate,
+            description: description,
+            id: id
+          });
+          return oldValue;
         });
-        return oldValue;
-      });
-      id++;
-      overWrite();
-      initContent();
-    } else
-      alert("Impossibile aggiungere la task richiesta. (max task raggiunte)");
-    overlapsLimit = 0;
+        id++;
+        overWrite();
+        initContent();
+      } else
+        alert("Impossibile aggiungere la task richiesta. (max task raggiunte)");
+      overlapsLimit = 0;
+    }
+    else
+      alert("No input detected");
   }
 
   function overWrite() {
@@ -263,27 +267,29 @@
     allitems = allitems.filter(s => s.id != id)
   }
   function Delete() {
-    let deleteYear = parseInt(dateToDelete.substring(0, 4));
-    let deleteMonth = parseInt(dateToDelete.substring(5, 7)) - 1;
-    let deleteDay = parseInt(dateToDelete.substring(8, 10));
-    let deleteDate = new Date(deleteYear, deleteMonth, deleteDay);
-    let index = 0;
-
-    for (let i of $interrogazioni) {
-      if (i.title == titleToDelete &&
-        i.date.getTime() == deleteDate.getTime()) {
-        UpdateStore(i.id);
-          for(let j of $interrogazioni){
-            if(j.date.getTime() == deleteDate.getTime()){
-              j.isBottom = false;
-            }
-          }  
-        break;
-        }
-      index++;
+    if(dateToDelete.length != 0 && titleToDelete.length != 0){
+      let deleteYear = parseInt(dateToDelete.substring(0, 4));
+      let deleteMonth = parseInt(dateToDelete.substring(5, 7)) -             1;
+      let deleteDay = parseInt(dateToDelete.substring(8, 10));
+      let deleteDate = new Date(deleteYear, deleteMonth,                                 deleteDay);
+     
+      for (let i of $interrogazioni) {
+        if (i.title == titleToDelete &&
+          i.date.getTime() == deleteDate.getTime()) {
+          UpdateStore(i.id);
+            for(let j of $interrogazioni){
+              if(j.date.getTime() == deleteDate.getTime()){
+                j.isBottom = false;
+              }
+            }    
+          break;
+          }
+      }
+      overWrite();
+      refresh();
     }
-    overWrite();
-    refresh();
+    else
+      alert("No input detected");
   }
 </script>
 
